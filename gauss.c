@@ -9,8 +9,9 @@
 
 void swap(double exmat[SIZE][2 * SIZE], int i1, int i2)
 {
-    
-    swap_for:for (int j = 0; j < 2 * SIZE; ++j)
+
+swap_for:
+    for (int j = 0; j < 2 * SIZE; ++j)
     {
         double temp = exmat[i1][j];
         exmat[i1][j] = exmat[i2][j];
@@ -20,7 +21,8 @@ void swap(double exmat[SIZE][2 * SIZE], int i1, int i2)
 
 void add(double exmat[SIZE][2 * SIZE], int i, int j, double cj)
 {
-    add_for:for (int k = 0; k < 2 * SIZE; ++k)
+add_for:
+    for (int k = 0; k < 2 * SIZE; ++k)
     {
         exmat[i][k] += cj * exmat[j][k];
     }
@@ -28,7 +30,8 @@ void add(double exmat[SIZE][2 * SIZE], int i, int j, double cj)
 
 void mul(double exmat[SIZE][2 * SIZE], int i, double ci)
 {
-    mul_for:for (int k = 0; k < 2 * SIZE; ++k)
+mul_for:
+    for (int k = 0; k < 2 * SIZE; ++k)
     {
         exmat[i][k] *= ci;
     }
@@ -38,7 +41,8 @@ void find_max_pivot_col(double exmat[SIZE][2 * SIZE], int col, int i_start, int 
 {
     int i_max = -1;
     double val_max = -1;
-    fmp_for:for (int i = i_start; i < SIZE; ++i)
+fmp_for:
+    for (int i = i_start; i < SIZE; ++i)
     {
         double val = fabs(exmat[i][col]);
         if (val > val_max)
@@ -52,9 +56,27 @@ void find_max_pivot_col(double exmat[SIZE][2 * SIZE], int col, int i_start, int 
     *val_best = val_max;
 }
 
+void find_next_pivot_col(double exmat[SIZE][2 * SIZE], int i_piv, int j_piv, int *i_next)
+{
+    int i_next_piv;
+    double valabs_next_piv;
+    find_max_pivot_col(exmat, j_piv, i_piv, &i_next_piv, &valabs_next_piv);
+    if (valabs_next_piv > 0)
+    {
+        // there is a pivot
+        *i_next = i_next_piv;
+    }
+    else
+    {
+        // no valid pivot
+        *i_next = -1;
+    }
+}
+
 void find_next_pivot(double exmat[SIZE][2 * SIZE], int i_piv, int j_piv, int *i_next, int *j_next)
 {
-    fnxtpiv_col_while:while (j_piv < SIZE)
+fnxtpiv_col_while:
+    while (j_piv < SIZE)
     {
         int i_next_piv;
         double valabs_next_piv;
@@ -74,10 +96,12 @@ void find_next_pivot(double exmat[SIZE][2 * SIZE], int i_piv, int j_piv, int *i_
 
 void gauss(double inmat[SIZE][SIZE], double exmat[SIZE][2 * SIZE], int *rank, double *determinant)
 {
-    // first, extend inmat into exmat
-    g_ext_i:for (int i_ext = 0; i_ext < SIZE; ++i_ext)
+// first, extend inmat into exmat
+g_ext_i:
+    for (int i_ext = 0; i_ext < SIZE; ++i_ext)
     {
-        g_ext_j:for (int j_ext = 0; j_ext < SIZE; ++j_ext)
+    g_ext_j:
+        for (int j_ext = 0; j_ext < SIZE; ++j_ext)
         {
             // copy
             exmat[i_ext][j_ext] = inmat[i_ext][j_ext];
@@ -94,27 +118,30 @@ void gauss(double inmat[SIZE][SIZE], double exmat[SIZE][2 * SIZE], int *rank, do
     *rank = 0;
     int i_piv = 0, j_piv = 0;
     int i_piv_list[SIZE];
-    g_pivlist:for (int k_piv_list = 0; k_piv_list < SIZE; ++k_piv_list)
+g_pivlist:
+    for (int k_piv_list = 0; k_piv_list < SIZE; ++k_piv_list)
     {
         i_piv_list[k_piv_list] = -1;
     }
 
-    g_global:while (i_piv < SIZE && j_piv < SIZE)
+g_global:
+    // while (i_piv < SIZE && j_piv < SIZE)
+    for(j_piv = 0; j_piv<SIZE; ++j_piv)
     {
-        int i_next, j_next;
-        find_next_pivot(exmat, i_piv, j_piv, &i_next, &j_next);
+        int i_next;
+        find_next_pivot_col(exmat, i_piv, j_piv, &i_next);
 #if VERBOSE
         printf("-----STARTING STEP WITH i_piv=%d, j_piv=%d\n", i_piv, j_piv);
         printf("pivot search gave %d    %d\n", i_next, j_next);
 #endif
         if (i_next == -1)
         {
-            // means that no more pivots are available
-            // reduction is complete
-            break;
+            // means that no pivot are available for this column
+            // start again at the next
+            continue;
         }
 
-        j_piv = j_next;
+        // j_piv = j_next;
         i_piv_list[j_piv] = i_piv;
         // 1 - swap
         swap(exmat, i_piv, i_next);
@@ -131,8 +158,9 @@ void gauss(double inmat[SIZE][SIZE], double exmat[SIZE][2 * SIZE], int *rank, do
         print_exmat(exmat);
 #endif
 
-        // 3 - eliminate
-        g_eliminate:for (int i_line = i_piv + 1; i_line < SIZE; ++i_line)
+    // 3 - eliminate
+    g_eliminate:
+        for (int i_line = i_piv + 1; i_line < SIZE; ++i_line)
         {
             double ci = -exmat[i_line][j_piv];
             add(exmat, i_line, i_piv, ci);
@@ -140,7 +168,7 @@ void gauss(double inmat[SIZE][SIZE], double exmat[SIZE][2 * SIZE], int *rank, do
             exmat[i_line][j_piv] = 0;
         }
         ++i_piv;
-        ++j_piv;
+        // ++j_piv;
 #if VERBOSE
         printf("after add\n");
         print_exmat(exmat);
@@ -157,8 +185,9 @@ void gauss(double inmat[SIZE][SIZE], double exmat[SIZE][2 * SIZE], int *rank, do
     printf("\n");
 #endif
 
-    // Reduce phase
-    g_reduce_j:for (int j_rpiv = SIZE - 1; j_rpiv >= 0; --j_rpiv)
+// Reduce phase
+g_reduce_j:
+    for (int j_rpiv = SIZE - 1; j_rpiv >= 0; --j_rpiv)
     {
         if (i_piv_list[j_rpiv] >= 0)
         {
@@ -168,7 +197,8 @@ void gauss(double inmat[SIZE][SIZE], double exmat[SIZE][2 * SIZE], int *rank, do
 #if VERBOSE
             printf("pivot found at %d, %d\n", i_rpiv, j_rpiv);
 #endif
-            g_reduct_i:for (int i_line = 0; i_line < i_rpiv; ++i_line)
+        g_reduct_i:
+            for (int i_line = 0; i_line < i_rpiv; ++i_line)
             {
                 double ci = -exmat[i_line][j_rpiv];
                 add(exmat, i_line, i_rpiv, ci);
@@ -188,8 +218,9 @@ void gauss(double inmat[SIZE][SIZE], double exmat[SIZE][2 * SIZE], int *rank, do
 #endif
     }
 
-    // determinant calculus
-    g_det:for (int k = 0; k < SIZE; ++k)
+// determinant calculus
+g_det:
+    for (int k = 0; k < SIZE; ++k)
     {
         *determinant *= exmat[k][k];
     }

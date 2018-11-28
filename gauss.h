@@ -1,7 +1,7 @@
 #ifndef GAUSS_H
 #define GAUSS_H
 
-#define SIZE 30
+#define SIZE 50
 #define VERBOSE 0
 
 #define EPS 1e-10

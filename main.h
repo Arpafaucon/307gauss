@@ -4,7 +4,7 @@
 
 #define TEST_VERBOSE 0
 #define TEST_CAP 50
-#define TEST_NUM 1
+#define TEST_NUM 1000
 
 void print_exmat(double exmat[SIZE][2 * SIZE]);
 void print_inmat(double inmat[SIZE][SIZE]);

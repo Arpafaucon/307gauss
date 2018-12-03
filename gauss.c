@@ -73,6 +73,7 @@ void find_next_pivot_col(double exmat[SIZE][2 * SIZE], int i_piv, int j_piv, int
     }
 }
 
+#ifndef HLS
 void find_next_pivot(double exmat[SIZE][2 * SIZE], int i_piv, int j_piv, int *i_next, int *j_next)
 {
 fnxtpiv_col_while:
@@ -93,9 +94,16 @@ fnxtpiv_col_while:
     *i_next = -1;
     *j_next = -1;
 }
+#endif
+
 
 void gauss(double inmat[SIZE][SIZE], double exmat[SIZE][2 * SIZE], int *rank, double *determinant)
 {
+#pragma HLS INTERFACE s_axilite port=determinant bundle=METRICS name=exdet
+#pragma HLS INTERFACE s_axilite port=rank bundle=METRICS name=exrank
+#pragma HLS INTERFACE m_axi depth=32 port=exmat name=exmat
+#pragma HLS INTERFACE m_axi depth=32 port=inmat name=inmat
+#pragma HLS INTERFACE ap_ctrl_none port=return
 // first, extend inmat into exmat
 g_ext_i:
     for (int i_ext = 0; i_ext < SIZE; ++i_ext)

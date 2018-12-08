@@ -1,0 +1,1 @@
+/home/arpad/install/vivado/SDK/2018.2/eclipse/lnx64.o/eclipse -data /home/arpad/dev/ensta/307/vd/gauss/gauss.sdk -vmargs -Dcom.xilinx.sdk.args.hwspec=/home/arpad/dev/ensta/307/vd/gauss/gauss.sdk/design_1_wrapper.hdf -Xms64m -Xmx4G -Dorg.eclipse.swt.internal.gtk.cairoGraphics=false

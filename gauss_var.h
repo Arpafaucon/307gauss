@@ -10,11 +10,11 @@ namespace gvar{
 /**
  * @brief Swap two lines of the ext matrix
  */
-void swap(int size, double *exmat, int i, int i2);
+void swap(idx_t size, float_t *exmat, idx_t i, idx_t i2);
 /**
  * @brief Add one line to another, with a multiplicative coefficient
  */
-void add(int size, double *exmat, int i, int j, double cj);
+void add(idx_t size, float_t *exmat, idx_t i, idx_t j, float_t cj);
 /**
  * @brief multiply a row by a given coefficient
  * 
@@ -22,7 +22,7 @@ void add(int size, double *exmat, int i, int j, double cj);
  * @param[in] i 
  * @param[in] ci 
  */
-void mul(int size, double *exmat, int i, double ci);
+void mul(idx_t size, float_t *exmat, idx_t i, float_t ci);
 
 /**
  * @brief Find the best pivot in a column
@@ -34,11 +34,11 @@ void mul(int size, double *exmat, int i, double ci);
  * @param[in] val_best 
  * 
  */
-void find_max_pivot_col(int size, double *exmat, int col, int i_start, int *i_best, double *val_best);
+void find_max_pivot_col(idx_t size, float_t *exmat, idx_t col, idx_t i_start, idx_t *i_best, float_t *val_best);
 /**
  * @brief Total procedure, fill exmat with the extended reduced-eliminated version of inmat. Fill also rank and determinant
  */
-void gauss(int size, double *exmat, int* rank, double *determinant);
+void gauss(idx_t size, float_t *exmat, idx_t* rank, float_t *determinant);
 
 }
 #endif

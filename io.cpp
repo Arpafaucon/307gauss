@@ -3,20 +3,17 @@
 
 #include "gauss.h"
 
-// #include "bench.h"
-// #include "gauss.h"
-
-inline double AT(int size, double const *mat, int i, int j)
+inline float_t AT(idx_t size, float_t const *mat, idx_t i, idx_t j)
 {
     return mat[i * size + j];
 }
 
-inline double ATX(int size, double const *mat, int i, int j)
+inline float_t ATX(idx_t size, float_t const *mat, idx_t i, idx_t j)
 {
     return mat[i * 2 * size + j];
 }
 
-void print_data(double data)
+void print_data(float_t data)
 {
     if (fabs(data) < EPS)
     {
@@ -28,32 +25,32 @@ void print_data(double data)
     }
 }
 
-void print_exmat(int size, double const *exmat)
+void print_exmat(idx_t size, float_t const *exmat)
 {
-    for (int i = 0; i < size; ++i)
+    for (idx_t i = 0; i < size; ++i)
     {
-        for (int j = 0; j < size; ++j)
+        for (idx_t j = 0; j < size; ++j)
         {
-            double val = ATX(size, exmat, i, j);
+            float_t val = ATX(size, exmat, i, j);
             print_data(val);
         }
         printf(" | ");
-        for (int j = 0; j < size; ++j)
+        for (idx_t j = 0; j < size; ++j)
         {
-            double val = ATX(size, exmat, i, size + j);
+            float_t val = ATX(size, exmat, i, size + j);
             print_data(val);
         }
         printf("\n");
     }
 }
 
-void print_inmat(int size, double const *inmat)
+void print_inmat(idx_t size, float_t const *inmat)
 {
-    for (int i = 0; i < size; ++i)
+    for (idx_t i = 0; i < size; ++i)
     {
-        for (int j = 0; j < size; ++j)
+        for (idx_t j = 0; j < size; ++j)
         {
-            double val = AT(size, inmat, i, j);
+            float_t val = AT(size, inmat, i, j);
             print_data(val);
             // printf("%5.2lf ", inmat[i][j]);
         }

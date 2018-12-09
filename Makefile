@@ -1,6 +1,6 @@
 CC=g++
 
-CPPFLAGS=-Wall -Wno-unused-label -O3 -g
+CPPFLAGS=-Wall -Wno-unused-label -O0 -g
 LDFLAGS=-g -lm
 
 SRCS=main_pc.cpp gauss_var.cpp gauss_fixed.cpp bench_common.cpp io.cpp bench_pc.cpp

@@ -1,6 +1,3 @@
-// #include <stdlib.h>
-// #include <stdio.h>
-// #include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
@@ -13,51 +10,56 @@
 #define COLS 2 * SIZE
 #define AT(mat, i, j) (mat[(i) * (COLS) + (j)])
 
-
-void swap(float64 exmat[TOTALSIZE], int8 i1, int8 i2)
+void swap(float_t exmat[TOTALSIZE], idx_t i1, idx_t i2)
 {
-
 swap_for:
-    for (int8 j = 0; j < 2 * SIZE; ++j)
+    for (idx_t j = 0; j < 2 * SIZE; ++j)
     {
-        float64 temp = AT(exmat, i1, j);
+//#pragma HLS PIPELINE
+#pragma HLS INLINE off
+        float_t temp = AT(exmat, i1, j);
         AT(exmat, i1, j) = AT(exmat, i2, j);
         AT(exmat, i2, j) = temp;
-        // float64 temp = exmat[i1][j];
-        // exmat[i1][j] = exmat[i2][j];
-        // exmat[i2][j] = temp;
     }
 }
 
-void add(float64 exmat[TOTALSIZE], int8 i, int8 j, float64 cj)
+void add(float_t exmat[TOTALSIZE], idx_t i, idx_t j, float_t cj)
 {
 add_for:
-    for (int8 k = 0; k < 2 * SIZE; ++k)
+    for (idx_t k = 0; k < 2 * SIZE; ++k)
+//#pragma HLS PIPELINE
+#pragma HLS INLINE off
     {
-        AT(exmat, i, k) += cj * AT(exmat, j, k);
-        // exmat[i][k] += cj * exmat[j][k];
+        float_t offset = cj * AT(exmat, j, k);
+        AT(exmat, i, k) += offset;
     }
 }
 
-void mul(float64 exmat[TOTALSIZE], int8 i, float64 ci)
+void mul(float_t exmat[TOTALSIZE], idx_t i, float_t ci)
 {
 mul_for:
-    for (int8 k = 0; k < 2 * SIZE; ++k)
+    for (idx_t k = 0; k < 2 * SIZE; ++k)
     {
+//#pragma HLS PIPELINE
+#pragma HLS INLINE off
         AT(exmat, i, k) *= ci;
-        // exmat[i][k] *= ci;
     }
 }
 
-void find_max_pivot_col(float64 exmat[TOTALSIZE], int8 col, int8 i_start, int8 *i_best, float64 *val_best)
+void find_max_pivot_col(float_t exmat[TOTALSIZE], idx_t col, idx_t i_start, idx_t *i_best, float_t *val_best)
 {
-    int8 i_max = -1;
-    float64 val_max = -1;
+    idx_t i_max = NOT_FOUND;
+    float_t val_max = -1;
 fmp_for:
-    for (int8 i = i_start; i < SIZE; ++i)
+    // for (idx_t i = i_start; i < SIZE; ++i)
+    for (idx_t i = 0; i < SIZE; ++i)
     {
-        float64 val = fabs(AT(exmat, i, col));
-        // float64 val = fabs(exmat[i][col]);
+        if (i < i_start)
+        {
+            continue;
+        }
+        float_t val = fabs(AT(exmat, i, col));
+        // float_t val = fabs(exmat[i][col]);
         if (val > val_max)
         {
             //new max !!
@@ -69,10 +71,10 @@ fmp_for:
     *val_best = val_max;
 }
 
-void find_next_pivot_col(float64 exmat[TOTALSIZE], int8 i_piv, int8 j_piv, int8 *i_next)
+void find_next_pivot_col(float_t exmat[TOTALSIZE], idx_t i_piv, idx_t j_piv, idx_t *i_next)
 {
-    int8 i_next_piv;
-    float64 valabs_next_piv;
+    idx_t i_next_piv;
+    float_t valabs_next_piv;
     find_max_pivot_col(exmat, j_piv, i_piv, &i_next_piv, &valabs_next_piv);
     if (valabs_next_piv > 0)
     {
@@ -82,11 +84,11 @@ void find_next_pivot_col(float64 exmat[TOTALSIZE], int8 i_piv, int8 j_piv, int8 
     else
     {
         // no valid pivot
-        *i_next = -1;
+        *i_next = NOT_FOUND;
     }
 }
 
-void gauss(float64 exmat[TOTALSIZE], int8 *rank, float64 *determinant)
+void gauss(float_t exmat[TOTALSIZE], idx_t *rank, float_t *determinant)
 {
 
 #if VERBOSE
@@ -96,25 +98,25 @@ void gauss(float64 exmat[TOTALSIZE], int8 *rank, float64 *determinant)
 
     *determinant = 1;
     *rank = 0;
-    int8 i_piv = 0, j_piv = 0;
-    int8 i_piv_list[SIZE];
+    idx_t i_piv = 0, j_piv = 0;
+    idx_t i_piv_list[SIZE];
 g_pivlist:
-    for (int8 k_piv_list = 0; k_piv_list < SIZE; ++k_piv_list)
+    for (idx_t k_piv_list = 0; k_piv_list < SIZE; ++k_piv_list)
     {
-        i_piv_list[k_piv_list] = -1;
+        i_piv_list[k_piv_list] = NOT_FOUND;
     }
 
 g_global:
     // while (i_piv < SIZE && j_piv < SIZE)
     for (j_piv = 0; j_piv < SIZE; ++j_piv)
     {
-        int8 i_next;
+        idx_t i_next;
         find_next_pivot_col(exmat, i_piv, j_piv, &i_next);
 #if VERBOSE
         printf("-----STARTING STEP WITH i_piv=%d, j_piv=%d\n", i_piv, j_piv);
         printf("pivot search gave i=%d    \n", i_next);
 #endif
-        if (i_next == -1)
+        if (i_next == NOT_FOUND)
         {
             // means that no pivot are available for this column
             // start again at the next
@@ -130,8 +132,8 @@ g_global:
         print_exmat(SIZE, exmat);
 #endif
         // 2 - scale
-        float64 f_piv = AT(exmat, i_piv, j_piv);
-        // float64 f_piv = exmat[i_piv][j_piv];
+        float_t f_piv = AT(exmat, i_piv, j_piv);
+        // float_t f_piv = exmat[i_piv][j_piv];
         mul(exmat, i_piv, 1 / f_piv);
         *determinant *= f_piv;
 #if VERBOSE
@@ -141,14 +143,19 @@ g_global:
 
     // 3 - eliminate
     g_eliminate:
-        for (int8 i_line = i_piv + 1; i_line < SIZE; ++i_line)
+        // for (idx_t i_line = i_piv + 1; i_line < SIZE; ++i_line)
+        for (idx_t i_line = 0; i_line < SIZE; ++i_line)
         {
-            float64 ci = -AT(exmat, i_line, j_piv);
-            // float64 ci = -exmat[i_line][j_piv];
-            add(exmat, i_line, i_piv, ci);
-            // not strictly necessary but ensures numerical stability
-            AT(exmat, i_line, j_piv) = 0;
-            // exmat[i_line][j_piv] = 0;
+            if (i_line > i_piv)
+            {
+
+                float_t ci = -AT(exmat, i_line, j_piv);
+                // float_t ci = -exmat[i_line][j_piv];
+                add(exmat, i_line, i_piv, ci);
+                // not strictly necessary but ensures numerical stability
+                AT(exmat, i_line, j_piv) = 0;
+                // exmat[i_line][j_piv] = 0;
+            }
         }
         ++i_piv;
         // ++j_piv;
@@ -161,7 +168,7 @@ g_global:
 #if VERBOSE
     printf("## END OF 1st PHASE\n");
     printf("## Pivot list\n");
-    for (int8 i = 0; i < SIZE; i++)
+    for (idx_t i = 0; i < SIZE; i++)
     {
         printf("%d ", i_piv_list[i]);
     }
@@ -170,25 +177,30 @@ g_global:
 
 // Reduce phase
 g_reduce_j:
-    for (int8 j_rpiv = SIZE - 1; j_rpiv >= 0; --j_rpiv)
+    for (idx_t j_rpiv = SIZE - 1; j_rpiv >= 0; --j_rpiv)
     {
-        if (i_piv_list[j_rpiv] >= 0)
+        if (i_piv_list[j_rpiv] != NOT_FOUND)
         {
             // there was a pivot
             ++(*rank);
-            int8 i_rpiv = i_piv_list[j_rpiv];
+            idx_t i_rpiv = i_piv_list[j_rpiv];
 #if VERBOSE
             printf("pivot found at %d, %d\n", i_rpiv, j_rpiv);
 #endif
         g_reduct_i:
-            for (int8 i_line = 0; i_line < i_rpiv; ++i_line)
+            // for (idx_t i_line = 0; i_line < i_rpiv; ++i_line)
+            for (idx_t i_line = 0; i_line < SIZE; ++i_line)
             {
-                float64 ci = -AT(exmat, i_line, j_rpiv);
-                // float64 ci = -exmat[i_line][j_rpiv];
-                add(exmat, i_line, i_rpiv, ci);
-                // not strictly necessary but ensures numerical stability
-                AT(exmat, i_line, j_rpiv) = 0;
-                // exmat[i_line][j_rpiv] = 0;
+                if (i_line < i_rpiv)
+                {
+
+                    float_t ci = -AT(exmat, i_line, j_rpiv);
+                    // float_t ci = -exmat[i_line][j_rpiv];
+                    add(exmat, i_line, i_rpiv, ci);
+                    // not strictly necessary but ensures numerical stability
+                    AT(exmat, i_line, j_rpiv) = 0;
+                    // exmat[i_line][j_rpiv] = 0;
+                }
             }
         }
         else
@@ -205,7 +217,7 @@ g_reduce_j:
 
 // determinant calculus
 g_det:
-    for (int8 k = 0; k < SIZE; ++k)
+    for (idx_t k = 0; k < SIZE; ++k)
     {
         *determinant *= AT(exmat, k, k);
         // *determinant *= exmat[k][k];

@@ -13,25 +13,25 @@
 namespace bench_common
 {
 
-double &AT(int size, double *matptr, int i, int j)
+float_t &AT(idx_t size, float_t *matptr, idx_t i, idx_t j)
 {
-    int index = size * i + j;
+    idx_t index = size * i + j;
     return matptr[index];
 }
-double AT(int size, double const *matptr, int i, int j)
+float_t AT(idx_t size, float_t const *matptr, idx_t i, idx_t j)
 {
-    int index = size * i + j;
+    idx_t index = size * i + j;
     return matptr[index];
 }
 
-double &ATX(int size, double *matptr, int i, int j)
+float_t &ATX(idx_t size, float_t *matptr, idx_t i, idx_t j)
 {
-    int index = (2 * size) * i + j;
+    idx_t index = (2 * size) * i + j;
     return matptr[index];
 }
-double ATX(int size, double const *matptr, int i, int j)
+float_t ATX(idx_t size, float_t const *matptr, idx_t i, idx_t j)
 {
-    int index = (2 * size) * i + j;
+    idx_t index = (2 * size) * i + j;
     return matptr[index];
 }
 
@@ -48,12 +48,12 @@ void gr_fgets(char *read_buffer, int n, FILE *input)
 #endif
 }
 
-void print_matrix(int row, int col, int *matrix)
+void print_matrix(idx_t row, idx_t col, int *matrix)
 {
 #if TEST_DEBUG
-    for (int i = 0; i < row; i++)
+    for (idx_t i = 0; i < row; i++)
     {
-        for (int j = 0; j < col; j++)
+        for (idx_t j = 0; j < col; j++)
         {
             printf("%3d ", matrix[i * col + j]);
         }
@@ -64,9 +64,9 @@ void print_matrix(int row, int col, int *matrix)
 
 void read_header(FILE *f_dts, int &num_tests, int &max_chars, int &max_coeffs)
 {
-    char line[LINE_MAX];
+    char line[BC_LINE_MAX];
     char *current_char = line, *dest_char;
-    gr_fgets(line, LINE_MAX, f_dts);
+    gr_fgets(line, BC_LINE_MAX, f_dts);
     num_tests = strtol(current_char, &dest_char, 10);
     current_char = dest_char + 1;
 #if TEST_DEBUG
@@ -97,7 +97,7 @@ void read_header(FILE *f_dts, int &num_tests, int &max_chars, int &max_coeffs)
  * 
  * @return int 
  */
-int read_test(FILE *f_dts, int buffer_size, int *buffer_data, int &test_id, int &matrix_size, int &data_size)
+int read_test(FILE *f_dts, int buffer_size, int *buffer_data, int &test_id, idx_t &matrix_size, int &data_size)
 {
 #if TEST_DEBUG
     printf("\n--reading test\n");
@@ -142,12 +142,12 @@ int read_test(FILE *f_dts, int buffer_size, int *buffer_data, int &test_id, int 
     return 0;
 }
 
-void fill_matrix(double inmat[SIZE][SIZE], int const cap)
+void fill_matrix(float_t inmat[SIZE][SIZE], int const cap)
 {
 
-    for (int i = 0; i < SIZE; ++i)
+    for (idx_t i = 0; i < SIZE; ++i)
     {
-        for (int j = 0; j < SIZE; ++j)
+        for (idx_t j = 0; j < SIZE; ++j)
         {
             int num = rand() % cap;
             inmat[i][j] = num;
@@ -155,11 +155,11 @@ void fill_matrix(double inmat[SIZE][SIZE], int const cap)
     }
 }
 
-double det_mat33(double inmat[SIZE][SIZE])
+float_t det_mat33(float_t inmat[SIZE][SIZE])
 {
     assert(SIZE == 3);
     // loi de malus
-    double det = 0;
+    float_t det = 0;
     det += inmat[0][0] * inmat[1][1] * inmat[2][2];
     det += inmat[0][1] * inmat[1][2] * inmat[2][0];
     det += inmat[0][2] * inmat[1][0] * inmat[2][1];
@@ -169,9 +169,9 @@ double det_mat33(double inmat[SIZE][SIZE])
     return det;
 }
 
-int test_matrix(int size, double const *inmat, double const *exmat, double determinant)
+int test_matrix(idx_t size, float_t const *inmat, float_t const *exmat, float_t determinant)
 {
-    int i, j;
+    idx_t i, j;
 #if TEST_VERBOSE
     printf("\n---- TEST -------\n");
     print_inmat(size, inmat);
@@ -186,10 +186,10 @@ int test_matrix(int size, double const *inmat, double const *exmat, double deter
     printf("Is inversible (det = %lf)\n", determinant);
 #endif
     // test if really inversible
-    double *prod1 = nullptr;
-    double *prod2 = nullptr;
-    prod1 = new double[size * size];
-    prod2 = new double[size * size];
+    float_t *prod1 = nullptr;
+    float_t *prod2 = nullptr;
+    prod1 = new float_t[size * size];
+    prod2 = new float_t[size * size];
     // double *prod1 = (double *)malloc(size * size * sizeof(double));
     // double *prod2 = (double *)malloc(size * size * sizeof(double));
 
@@ -197,9 +197,9 @@ int test_matrix(int size, double const *inmat, double const *exmat, double deter
     {
         for (j = 0; j < size; ++j)
         {
-            double temp1 = 0;
-            double temp2 = 0;
-            for (int k = 0; k < size; k++)
+            float_t temp1 = 0;
+            float_t temp2 = 0;
+            for (idx_t k = 0; k < size; k++)
             {
                 temp1 += ATX(size, exmat, i, size + k) * AT(size, inmat, k, j);
                 temp2 += AT(size, inmat, i, k) * ATX(size, exmat, k, size + j);
@@ -216,25 +216,27 @@ int test_matrix(int size, double const *inmat, double const *exmat, double deter
     printf("--\n");
     print_inmat(size, prod2);
 #endif
-    double diff_total = 0;
+    float_t diff_total = 0;
     for (i = 0; i < size; ++i)
     {
         for (j = 0; j < size; ++j)
         {
-            double expected = (i == j ? 1 : 0);
-            double diff1 = fabs(expected - AT(size, prod1, i, j));
-            double diff2 = fabs(expected - AT(size, prod2, i, j));
+            float_t expected = (i == j ? 1 : 0);
+            float_t diff1 = fabs(expected - AT(size, prod1, i, j));
+            float_t diff2 = fabs(expected - AT(size, prod2, i, j));
             // double diff2 = fabs(expected - prod2[i][j]);
             diff_total += diff1;
             diff_total += diff2;
         }
     }
+    // normalize diff
+    diff_total /= 2*size*size;
 #if TEST_VERBOSE
     printf("Diff total : %lf\n", diff_total);
 #endif
     delete[] prod1;
     delete[] prod2;
-    if (diff_total < 1e-5)
+    if (diff_total < 1e-3)
     {
         return 1;
     }

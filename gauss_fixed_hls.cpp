@@ -5,10 +5,10 @@
 #include "gauss_fixed_hls.h"
 #include "gauss.h"
 #include <cstdio>
-#define VERBOSE 01
-#if VERBOSE
-#include "io.h"
-#endif
+#define VERBOSE 0
+// #if VERBOSE
+// #include "io.h"
+// #endif
 
 #define COLS 2 * SIZE_HLS
 #define AT(mat, i, j) (mat[(i) * (COLS) + (j)])
@@ -26,17 +26,17 @@ void print_data(coeff_t data)
     }
 }
 
-void print_exmat(idx_t size, coeff_t const *exmat)
+void print_exmat(hidx_t size, coeff_t const *exmat)
 {
-    for (idx_t i = 0; i < size; ++i)
+    for (hidx_t i = 0; i < size; ++i)
     {
-        for (idx_t j = 0; j < size; ++j)
+        for (hidx_t j = 0; j < size; ++j)
         {
             coeff_t val = AT(exmat, i, j);
             print_data(val);
         }
         printf(" | ");
-        for (idx_t j = 0; j < size; ++j)
+        for (hidx_t j = 0; j < size; ++j)
         {
             coeff_t val = AT(exmat, i, size + j);
             print_data(val);
@@ -52,11 +52,10 @@ coeff_t coeff_abs(coeff_t val){
     // return val;
 }
 
-void swap(coeff_t exmat[TOTALSIZE_HLS], idx_t i1, idx_t i2)
+void swap(coeff_t exmat[TOTALSIZE_HLS], hidx_t i1, hidx_t i2)
 {
-#pragma HLS INLINE off
 swap_for:
-   for (idx_t j = 0; j < 2 * SIZE_HLS; ++j)
+   for (hidx_t j = 0; j < 2 * SIZE_HLS; ++j)
    {
 //#pragma HLS PIPELINE
        coeff_t temp = AT(exmat, i1, j);
@@ -65,11 +64,10 @@ swap_for:
    }
 }
 
-void add(coeff_t exmat[TOTALSIZE_HLS], idx_t i, idx_t j, coeff_t cj)
+void add(coeff_t exmat[TOTALSIZE_HLS], hidx_t i, hidx_t j, coeff_t cj)
 {
-#pragma HLS INLINE off
 add_for:
-   for (idx_t k = 0; k < 2 * SIZE_HLS; ++k)
+   for (hidx_t k = 0; k < 2 * SIZE_HLS; ++k)
 //#pragma HLS PIPELINE
    {
        coeff_t offset = cj * AT(exmat, j, k);
@@ -77,24 +75,24 @@ add_for:
    }
 }
 
-void mul(coeff_t exmat[TOTALSIZE_HLS], idx_t i, coeff_t ci)
+void mul(coeff_t exmat[TOTALSIZE_HLS], hidx_t i, coeff_t ci)
 {
 //#pragma HLS INLINE off
 mul_for:
-   for (idx_t k = 0; k < 2 * SIZE_HLS; ++k)
+   for (hidx_t k = 0; k < 2 * SIZE_HLS; ++k)
    {
 //#pragma HLS PIPELINE
        AT(exmat, i, k) *= ci;
    }
 }
 
-void find_max_pivot_col(coeff_t exmat[TOTALSIZE_HLS], idx_t col, idx_t i_start, idx_t &i_best, coeff_t &val_best)
+void find_max_pivot_col(coeff_t exmat[TOTALSIZE_HLS], hidx_t col, hidx_t i_start, hidx_t &i_best, coeff_t &val_best)
 {
-    idx_t i_max = NOT_FOUND;
+    hidx_t i_max = NOT_FOUND;
     coeff_t val_max = -1;
 fmp_for:
-    // for (idx_t i = i_start; i < SIZE_HLS; ++i)
-    for (idx_t i = 0; i < SIZE_HLS; ++i)
+    // for (hidx_t i = i_start; i < SIZE_HLS; ++i)
+    for (hidx_t i = 0; i < SIZE_HLS; ++i)
     {
         if (i < i_start)
         {
@@ -113,9 +111,9 @@ fmp_for:
     val_best = val_max;
 }
 
-void find_next_pivot_col(coeff_t exmat[TOTALSIZE_HLS], idx_t i_piv, idx_t j_piv, idx_t &i_next)
+void find_next_pivot_col(coeff_t exmat[TOTALSIZE_HLS], hidx_t i_piv, hidx_t j_piv, hidx_t &i_next)
 {
-    idx_t i_next_piv;
+    hidx_t i_next_piv;
     coeff_t valabs_next_piv;
     find_max_pivot_col(exmat, j_piv, i_piv, i_next_piv, valabs_next_piv);
     if (valabs_next_piv > 0)
@@ -130,7 +128,7 @@ void find_next_pivot_col(coeff_t exmat[TOTALSIZE_HLS], idx_t i_piv, idx_t j_piv,
     }
 }
 
-void gauss(coeff_t exmat[TOTALSIZE_HLS], idx_t &rank, det_t &determinant)
+void gauss(coeff_t exmat[TOTALSIZE_HLS], hidx_t &rank, det_t &determinant)
 {
 
 #if VERBOSE
@@ -140,10 +138,10 @@ void gauss(coeff_t exmat[TOTALSIZE_HLS], idx_t &rank, det_t &determinant)
 
     determinant = 1.;
     rank = 0;
-    idx_t i_piv = 0, j_piv = 0;
-    idx_t i_piv_list[SIZE_HLS];
+    hidx_t i_piv = 0, j_piv = 0;
+    hidx_t i_piv_list[SIZE_HLS];
 g_pivlist:
-    for (idx_t k_piv_list = 0; k_piv_list < SIZE_HLS; ++k_piv_list)
+    for (hidx_t k_piv_list = 0; k_piv_list < SIZE_HLS; ++k_piv_list)
     {
         i_piv_list[k_piv_list] = NOT_FOUND;
     }
@@ -152,7 +150,7 @@ g_global:
     // while (i_piv < SIZE_HLS && j_piv < SIZE_HLS)
     for (j_piv = 0; j_piv < SIZE_HLS; ++j_piv)
     {
-        idx_t i_next = NOT_FOUND;
+        hidx_t i_next = NOT_FOUND;
         find_next_pivot_col(exmat, i_piv, j_piv, i_next);
 #if VERBOSE
         printf("-----STARTING STEP WITH i_piv=%d, j_piv=%d\n", i_piv, j_piv);
@@ -186,8 +184,8 @@ g_global:
 
     // 3 - eliminate
     g_eliminate:
-        // for (idx_t i_line = i_piv + 1; i_line < SIZE_HLS; ++i_line)
-        for (idx_t i_line = 0; i_line < SIZE_HLS; ++i_line)
+        // for (hidx_t i_line = i_piv + 1; i_line < SIZE_HLS; ++i_line)
+        for (hidx_t i_line = 0; i_line < SIZE_HLS; ++i_line)
         {
             if (i_line > i_piv)
             {
@@ -210,7 +208,7 @@ g_global:
 #if VERBOSE
     printf("## END OF 1st PHASE\n");
     printf("## Pivot list\n");
-    for (idx_t i = 0; i < SIZE_HLS; i++)
+    for (hidx_t i = 0; i < SIZE_HLS; i++)
     {
         printf("%d ", i_piv_list[i]);
     }
@@ -219,19 +217,19 @@ g_global:
 
 // Reduce phase
 g_reduce_j:
-    for (idx_t j_rpiv = SIZE_HLS - 1; j_rpiv >= 0; --j_rpiv)
+    for (hidx_t j_rpiv = SIZE_HLS ; j_rpiv -- > 0; )
     {
         if (i_piv_list[j_rpiv] != NOT_FOUND)
         {
             // there was a pivot
             ++rank;
-            idx_t i_rpiv = i_piv_list[j_rpiv];
+            hidx_t i_rpiv = i_piv_list[j_rpiv];
 #if VERBOSE
             printf("pivot found at %d, %d\n", i_rpiv, j_rpiv);
 #endif
         g_reduct_i:
-            // for (idx_t i_line = 0; i_line < i_rpiv; ++i_line)
-            for (idx_t i_line = 0; i_line < SIZE_HLS; ++i_line)
+            // for (hidx_t i_line = 0; i_line < i_rpiv; ++i_line)
+            for (hidx_t i_line = 0; i_line < SIZE_HLS; ++i_line)
             {
                 if (i_line < i_rpiv)
                 {
@@ -259,7 +257,7 @@ g_reduce_j:
 
 // determinant calculus
 g_det:
-    for (idx_t k = 0; k < SIZE_HLS; ++k)
+    for (hidx_t k = 0; k < SIZE_HLS; ++k)
     {
         determinant *= AT(exmat, k, k);
         // *determinant *= exmat[k][k];

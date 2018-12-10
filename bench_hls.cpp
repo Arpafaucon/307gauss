@@ -69,7 +69,7 @@ void compute_fixed_size_ip(int buffer_size, int const *buffer, int matrix_dim, d
 
         coeff_t cval = exmat[i];
         aValue.data = cval.range();
-        printf("sending %lf\t%x\n", cval.to_float(), aValue.data.to_int());
+        // printf("sending %lf\t%x\n", cval.to_float(), aValue.data.to_int());
         in_stream.write(aValue);
     }
 
@@ -125,16 +125,16 @@ void compute_fixed_size_ip(int buffer_size, int const *buffer, int matrix_dim, d
     is_correct = 1;
     for (size_t i = 0; i < GCP_CHECKS_SIZE; i++)
     {
-        is_correct *= control_port[i];
+        is_correct *= (control_port[i]!=0);
     }
     is_correct *= (rank == SIZE_HLS);
     
     
-    for(size_t i = 0; i < GCP_BUS_SIZE; i++)
-    {
-        printf("%3u ", control_port[i]);
-    }
-    printf("-> det=%lf\n", determinant.to_double());
+     for(size_t i = 0; i < GCP_BUS_SIZE; i++)
+     {
+         printf("%3u ", control_port[i]);
+     }
+     printf("-> det=%lf\n", determinant.to_double());
     
     
 
@@ -164,8 +164,8 @@ void dataset_battery()
     // sscanf(line, "%d,", &num_tests);
     printf("found %d tests\n", num_tests);
 
-    // for (int i = 0; i < num_tests; i++)
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < num_tests; i++)
+//     for (int i = 0; i < 15; i++)
     {
         int test_id, data_size;
         double core_time_taken = 0, total_time_taken = 0;

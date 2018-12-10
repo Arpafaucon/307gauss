@@ -5,7 +5,7 @@
 #define VERBOSE 0
 
 typedef float float_t;
-typedef short int idx_t;
+typedef unsigned int idx_t;
 
 // static constexpr idx_t NOT_FOUND = -1;
 #define NOT_FOUND -1

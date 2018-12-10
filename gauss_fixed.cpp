@@ -177,7 +177,7 @@ g_global:
 
 // Reduce phase
 g_reduce_j:
-    for (idx_t j_rpiv = SIZE - 1; j_rpiv >= 0; --j_rpiv)
+    for (idx_t j_rpiv = SIZE; j_rpiv -->0;)
     {
         if (i_piv_list[j_rpiv] != NOT_FOUND)
         {

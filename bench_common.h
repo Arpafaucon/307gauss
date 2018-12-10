@@ -7,7 +7,7 @@
 #include "gauss_fixed.h"
 
 // #define BC_LINE_MAX 512
-#define BUFFER_SIZE 12000
+#define BUFFER_SIZE 90000 //>200*200*2
 #define DATASET_UNIT 5
 
 #define TEST_VERBOSE 0

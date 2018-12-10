@@ -2,24 +2,26 @@
 #define GAUSS_FIXED_HLS_H
 
 #include <ap_fixed.h>
-#include "gauss.h"
+//#include "gauss.h"s
 
 
-#define SIZE_HLS 5
+#define SIZE_HLS 100
 #define TOTALSIZE_HLS 2 * SIZE_HLS *SIZE_HLS
+#define IDX_WIDTH 18 //should have 2^IDX_WIDTH > TOTALSIZE
 
 typedef ap_fixed<32, 16> coeff_t;
 typedef ap_fixed<64, 32> det_t;
-typedef short int idx_t;
+typedef ap_uint<IDX_WIDTH> hidx_t;
+// typedef short int hidx_t;
 
 /**
  * @brief Swap two lines of the ext matrix
  */
-void swap(coeff_t exmat[TOTALSIZE_HLS],  idx_t i1, idx_t i2);
+void swap(coeff_t exmat[TOTALSIZE_HLS],  hidx_t i1, hidx_t i2);
 /**
  * @brief Add one line to another, with a multiplicative coefficient
  */
-void add(coeff_t exmat[TOTALSIZE_HLS], idx_t i, idx_t j, coeff_t cj);
+void add(coeff_t exmat[TOTALSIZE_HLS], hidx_t i, hidx_t j, coeff_t cj);
 /**
  * @brief multiply a row by a given coefficient
  * 
@@ -27,7 +29,7 @@ void add(coeff_t exmat[TOTALSIZE_HLS], idx_t i, idx_t j, coeff_t cj);
  * @param[in] i 
  * @param[in] ci 
  */
-void mul(coeff_t exmat[TOTALSIZE_HLS], idx_t i, coeff_t ci);
+void mul(coeff_t exmat[TOTALSIZE_HLS], hidx_t i, coeff_t ci);
 
 // /**
 //  * @brief Search column by column the next suitable pivot
@@ -48,11 +50,11 @@ void mul(coeff_t exmat[TOTALSIZE_HLS], idx_t i, coeff_t ci);
  * @param[in] val_best 
  * 
  */
-void find_max_pivot_col(coeff_t exmat[TOTALSIZE_HLS], idx_t col, idx_t i_start, idx_t &i_best, coeff_t &val_best);
+void find_max_pivot_col(coeff_t exmat[TOTALSIZE_HLS], hidx_t col, hidx_t i_start, hidx_t &i_best, coeff_t &val_best);
 /**
  * @brief Total procedure, fill exmat with the extended reduced-eliminated version of inmat. Fill also rank and determinant
  */
-void gauss(coeff_t exmat[TOTALSIZE_HLS], idx_t &rank, det_t &determinant);
+void gauss(coeff_t exmat[TOTALSIZE_HLS], hidx_t &rank, det_t &determinant);
 
 
 

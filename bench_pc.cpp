@@ -76,6 +76,13 @@ void compute_variable_size_pc(int buffer_size, int const *buffer, idx_t matrix_d
 #endif
 float_t *inmat = new float_t[matrix_dim*matrix_dim];
 float_t *exmat = new float_t[2*matrix_dim*matrix_dim];
+if (inmat == nullptr || exmat == nullptr)
+{
+    printf("Memory allocation failed\n");
+    is_correct = 0;
+    core_time = total_time = 0;
+    return;
+}
 
     // double *exmat = (double *)malloc(2 * matrix_dim * matrix_dim * sizeof(double));
     // double *inmat = (double *)malloc(matrix_dim * matrix_dim * sizeof(double));

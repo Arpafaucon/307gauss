@@ -13,14 +13,20 @@
 
 void gauss_stream(hls::stream<AXI_VALUE> &in_stream, hls::stream<AXI_VALUE> &out_stream, unsigned char control_port[GCP_BUS_SIZE])
 {
+#pragma HLS INTERFACE ap_ctrl_hs port=return name=ipcontrol
+#pragma HLS INTERFACE s_axilite port=return bundle=ctrl_bus name=fun_control
+
+#pragma HLS INTERFACE axis register both port=out_stream name=stream_out
+#pragma HLS INTERFACE axis register both port=in_stream name=stream_in
+#pragma HLS INTERFACE s_axilite port=control_port bundle=ctrl_bus name=status_port
     coeff_t exmat[TOTALSIZE_HLS];
-    idx_t rank;
+    hidx_t rank;
     det_t determinant;
     // union stream_converter conv;
     // union coeff_stream_converter coeff_conv;
     coeff_t c_val;
     AXI_VALUE aValue;
-    int i;
+    hidx_t i;
     // int i, j;
     // has started
     control_port[GCP_STARTED] = 1;
@@ -36,6 +42,7 @@ stream_read:
         c_val.range() = aValue.data;
         // printf("read %lf \t%x\n", c_val.to_float(), aValue.data.to_int());
         exmat[i] = c_val;
+        control_port[GCP_STARTED] = i/2/SIZE_HLS;
     }
     control_port[GCP_RECEIVED] = 1;
     //
@@ -78,7 +85,9 @@ stream_write:
         // conv.f_val = exmat[i];
         aValue.data = c_val.range();
         aValue.last = (i == TOTALSIZE_HLS - 1);
+        control_port[GCP_TRANSMITTED_MATRIX] = i/2/SIZE_HLS;
         out_stream.write(aValue);
+
     }
-    control_port[GCP_TRANSMITTED_MATRIX] = 1;
+//    control_port[GCP_TRANSMITTED_MATRIX] = 1;
 }

@@ -6,15 +6,15 @@ import time
 
 COEFF_MAX = 20
 # DATASET = [(1, 5), (2, 2)]
-DATASET = [(1, 5), (5, 5), (10, 50), (50, 100), (100, 5)]
+DATASET = [(1, 5), (5, 5), (10, 90), (50, 100), (100, 400)]
 
 
 def gen_matrix(size):
     mat = np.random.randint(-COEFF_MAX, COEFF_MAX, (size, size))
     # mat = np.random.uniform(-COEFF_MAX, COEFF_MAX, (size, size))
-    det = int(np.linalg.det(mat))
+    # det = int(np.linalg.det(mat))
     rank = np.linalg.matrix_rank(mat)
-    return (size, (mat.reshape(-1)), (det, rank))
+    return (size, (mat.reshape(-1)), (1, rank))
 
 def write_gd_data(gold_file, test_id, det, rank):
     gold_file.write("{:<4},{:<10},{:<4}".format(test_id, det, rank))

@@ -1,4 +1,0 @@
-/home/arpad/dev/ensta/307/gauss/build/CMakeFiles/rebuild_cache.dir
-/home/arpad/dev/ensta/307/gauss/build/CMakeFiles/edit_cache.dir
-/home/arpad/dev/ensta/307/gauss/build/CMakeFiles/bench_pc.dir
-/home/arpad/dev/ensta/307/gauss/build/CMakeFiles/bench_hls.dir

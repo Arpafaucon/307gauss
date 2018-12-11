@@ -122,7 +122,7 @@ if (inmat == nullptr || exmat == nullptr)
 }
 
 // void mat_prod(double mat_a[SIZE][2*SIZE])
-void dataset_battery()
+void dataset_battery(std::string dataset, int policy)
 {
     int num_tests, num_tests_corrects = 0, max_chars, max_coeffs;
     double total_time = 0, core_time = 0;
@@ -132,15 +132,15 @@ void dataset_battery()
     // 0 - SETUP FILES
     FILE *f_dataset;
     // char line[BC_LINE_MAX];
-    f_dataset = fopen(dataset_fname.c_str(), "r");
+    f_dataset = fopen(dataset.c_str(), "r");
     if (f_dataset == NULL)
     {
-        printf("File %s not found\n", dataset_fname.c_str());
+        printf("File %s not found\n", dataset.c_str());
         exit(1);
     }
     read_header(f_dataset, num_tests, max_chars, max_coeffs);
     // sscanf(line, "%d,", &num_tests);
-    printf("found %d tests\n", num_tests);
+    // printf("found %d tests\n", num_tests);
 
 
     for (int i = 0; i < num_tests; i++)
@@ -151,19 +151,23 @@ void dataset_battery()
         double core_time_taken, total_time_taken;
         int test_correct;
 
-        read_test(f_dataset, BUFFER_SIZE, buffer, test_id, matrix_dim, data_size);
-
-        if (matrix_dim <= SIZE)
-        {
-            compute_fixed_size_pc(BUFFER_SIZE, buffer, matrix_dim, core_time_taken, total_time_taken, test_correct);
+        int error = read_test(f_dataset, BUFFER_SIZE, buffer, test_id, matrix_dim, data_size);
+        if(error){
+            printf("skipping test %d\n", test_id);
+            continue;
         }
-        else
-        {
+
+        // if ( matrix_dim <= SIZE && (policy==1 ||  (policy == 2 && matrix_dim > SIZE/2)))
+        // {
+        //     compute_fixed_size_pc(BUFFER_SIZE, buffer, matrix_dim, core_time_taken, total_time_taken, test_correct);
+        // }
+        // else
+        // {
             // if(test_id == 11){
             // }
 
             compute_variable_size_pc(BUFFER_SIZE, buffer, matrix_dim, core_time_taken, total_time_taken, test_correct);
-        }
+        // }
         num_tests_corrects += test_correct;
         total_time += total_time_taken;
         core_time += core_time_taken;
@@ -174,7 +178,7 @@ void dataset_battery()
     double global_time = (double)(global_end - global_start) / CLOCKS_PER_SEC;
 
     printf("## TEST COMPLETE ##\n");
-    printf("#size  : %d\n", SIZE);
+    // printf("#size  : %d\n", SIZE);
     printf("#tests  : %d\n", num_tests);
     printf("total time   : %lf ms\t[file IO, test setup & comp.]\n", global_time * 1000);
     printf("test time    : %lf ms\t[test setup & comp.] \n", total_time * 1000);

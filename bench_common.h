@@ -45,7 +45,7 @@ T ATX(idx_t size, T const *matptr, idx_t i, idx_t j)
 
 
 
-std::string const dataset_fname = "/home/arpad/dev/ensta/307/gauss/dataset/matrix_dataset.txt";
+std::string const dataset_fname = "/home/arpad/dev/ensta/307/gauss/dataset/100/matrix_dataset.txt";
 std::string const golden_fname = "~/dev/ensta/307/gauss/dataset/golden.txt";
 
 float_t &AT(idx_t size, float_t *matptr, idx_t i, idx_t j);

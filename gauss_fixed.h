@@ -2,7 +2,7 @@
 #define GAUSS_FIXED_H
 #include "gauss.h"
 
-#define SIZE 50
+#define SIZE 100
 #if SIZE > 120
 #error SIZE should be containable in a char
 #endif

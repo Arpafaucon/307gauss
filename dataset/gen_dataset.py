@@ -6,7 +6,16 @@ import time
 
 COEFF_MAX = 20
 # DATASET = [(1, 5), (2, 2)]
-DATASET = [(1, 5), (5, 5), (10, 90), (50, 100), (100, 400)]
+# DATASET = [(5, 100), (10, 100),(30, 100), (50, 100), (100, 200)]
+# DATASET = [(100, 999)]
+
+DTL = [
+[(10, 1000)],
+[(50, 1000)],
+[(100, 1000)],
+[(5, 200), (10, 200),(30, 200), (50, 200), (100, 200)]
+]
+
 
 
 def gen_matrix(size):
@@ -27,8 +36,8 @@ def write_dts_data(dts_file, test_id, size, data):
     dts_file.write("\n")
 
 
-def header_data():
-    zipped_dts = list(zip(*DATASET))
+def header_data(data):
+    zipped_dts = list(zip(*data))
     max_size = max(zipped_dts[0])
     max_chars = 7 + 4*max_size
     sum_counts = sum(zipped_dts[1])
@@ -38,25 +47,28 @@ def header_data():
     print(header)
     return header
 
-def gen_dataset(dts_filename, golden_filename):
+def gen_dataset(data, dts_filename, golden_filename):
     test_id = 0
     with open(dts_filename, 'w') as dts_f:
         with open(golden_filename, 'w') as gold_f:
             
-            header = header_data()
+            header = header_data(data)
             dts_f.write(header)
             gold_f.write(header)
 
-            for size, count in DATASET:
+            for size, count in data:
                 for i in range(count):
                     size, mat, golden = gen_matrix(size)
                     det, rank = golden
-                    test_id += 1
                     write_dts_data(dts_f, test_id, size,  mat)
                     write_gd_data(gold_f, test_id, det, rank)
+                    test_id += 1
     print("dataset has {} entries".format(test_id))
 
 
-line = list(gen_matrix(2))
-print(line)
-gen_dataset('matrix_dataset.txt', 'matrix_golden.txt')
+for i,dtl in enumerate(DTL):
+    gen_dataset(dtl, 'matrix{}.txt'.format(i), 'dum.txt')
+
+# line = list(gen_matrix(2))
+# print(line)
+# gen_dataset('matrix_dataset.txt', 'matrix_golden.txt')
